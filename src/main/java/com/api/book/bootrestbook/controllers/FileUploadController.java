@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.api.book.bootrestbook.helper.FileUploadHelper;
 
@@ -23,11 +24,14 @@ public class FileUploadController {
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Empty file, Please upload another");
         }
-        if (file.getContentType() != "image/jpeg") {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Upload with correct file type!");
+        System.out.println(file.getContentType());
+        if (!file.getContentType().equals("image/jpeg")) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload with correct file type!");
         }
         if (fileUploadHelper.uploadHelper(file)) {
-            return ResponseEntity.ok("File uploaded succesfully");
+            return ResponseEntity
+                    .ok(ServletUriComponentsBuilder.fromCurrentContextPath().path("/image/")
+                            .path(file.getOriginalFilename()).toUriString());
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
